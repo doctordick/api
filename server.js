@@ -1,5 +1,8 @@
-import 'dotenv/config';
-import './src/config/mongoose'
+if(process.env.NODE_ENV !== 'production'){
+  require('dotenv').load();
+}
+require('./src/config/mongoose');
+
 import express from 'express';
 import routes from './src/controllers/index';
 import bodyParser from 'body-parser'
@@ -10,8 +13,10 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
+app.set('port', (process.env.PORT || 5000));
+
 routes(app);
 
-app.listen(8080, () => {
-  console.log('Listening on port 8080.');
+app.listen(app.get('port'), () => {
+  console.log('Listening on port', app.get('port'));
 });

@@ -1,7 +1,11 @@
 import fs from 'fs';
 import mongoose from 'mongoose';
 
-mongoose.connect(process.env.MONGO_URL);
+mongoose.connect(process.env.MONGODB_URI, (err, database) => {
+  if(err) {
+    console.log(err.stack);
+  }
+});
 mongoose.connection.on('error', (err) => {
   console.log(err.stack);
 });
