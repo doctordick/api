@@ -1,6 +1,6 @@
 import async from 'async';
 import jwt from 'jsonwebtoken';
-import User from '../models/user';
+import User from './../models/user';
 
 export default (app) => {
   app.post('/login', (req, res) => {
@@ -12,11 +12,14 @@ export default (app) => {
     async.waterfall([
         (callback) => {
           User.findOne({
-            email: req.body.email
+            email: User.encrypt(req.body.email)
           }).exec(function(err, doc){
             if(err){
               return callback({statusCode: 500, message: 'Error querying for user.'})
             }
+            doc.email = User.decrypt(doc.email);
+            doc.firstName = User.decrypt(doc.firstName);
+            doc.lastName = User.decrypt(doc.lastName);
             callback(null, doc);
           });
 
@@ -57,11 +60,10 @@ export default (app) => {
     }
     async.waterfall([
         (callback) => {
-          let user = new User({
-            email: req.body.email,
-            firstName: req.body.firstName,
-            lastName: req.body.lastName
-          });
+          let user = new User();
+          user.email = User.encrypt(req.body.email);
+          user.firstName = User.encrypt(req.body.firstName);
+          user.lastName = User.encrypt(req.body.lastName);
           user.password = user.generateHash(req.body.password);
           user.save((err, doc) => {
             // status code for taken email
@@ -72,6 +74,9 @@ export default (app) => {
                 return callback({ statusCode: 500, message: 'Error saving user.' })
               }
             }
+            doc.email = User.decrypt(doc.email);
+            doc.firstName = User.decrypt(doc.firstName);
+            doc.lastName = User.decrypt(doc.lastName);
             callback(null, doc);
           });
         }
